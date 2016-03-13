@@ -23,6 +23,6 @@ Number karotzSender
 Number karotzSignal
 
 
-// Status Abfragen IP des Karotz 9.9.9.9 ersezten
+// Status Abfragen IP des Karotz 9.9.9.9 ersetzen
 String karotzFreierSpeicher "Freien Arbeitsspeicher [%s]"                   { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherWert.js)]" }
 String karotzFreierSpeicherProzent "Freien Arbeitsspeicher in Prozent [%s]" { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherProzentWert.js)]" }
