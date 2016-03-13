@@ -1,0 +1,28 @@
+//
+// Steuerung des OpenKarotz via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+Group gKarotz
+
+Switch karotzLedAus "LED ausschalten"
+Switch karotzLedGruen "LED Grün schalten"
+Switch karotzLedRot "LED Rot schalten"
+Switch karotzLedGelb "LED Gelb schalten"
+Switch karotzLedBlau "LED Blau schalten"
+Color  karotzFarbe "LED Farbe auswählen"
+
+Switch karotzOhr "Ohren zufällig bewegen"
+Number karotzLinkesOhr
+Number karotzRechtesOhr
+Switch karotzResetOhren "Ohren reset"
+
+Switch karotzFoto "Foto erstellen"
+Switch karotzRadio "Radio Hannover schalten"
+Number karotzSender
+Number karotzSignal
+
+
+// Status Abfragen IP des Karotz 9.9.9.9 ersezten
+String karotzFreierSpeicher "Freien Arbeitsspeicher [%s]"                   { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherWert.js)]" }
+String karotzFreierSpeicherProzent "Freien Arbeitsspeicher in Prozent [%s]" { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherProzentWert.js)]" }

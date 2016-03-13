@@ -1,0 +1,40 @@
+sitemap Karotz label="Karotz"
+{
+	
+
+Frame {
+        Group item=gKarotz label="Karotz" icon="karotz" {
+        	 
+         Frame label="System Info" {
+         	Text 		item=karotzFreierSpeicherProzent 	icon="selfMemory"
+			Text 		item=karotzFreierSpeicher 			icon="selfMemory"
+		 } 
+		 Frame label="LED"{
+		 	Switch		item=karotzLedAus		icon="karotz"
+			Switch 		item=karotzLedRot 		icon="karotzRot"
+			Switch 		item=karotzLedGelb 		icon="karotzGelb"
+			Switch 		item=karotzLedGruen 	icon="karotzGruen"
+			Switch 		item=karotzLedBlau 		icon="karotzBlau"
+			Colorpicker item=karotzFarbe 		icon="slider"
+	        }
+	     Frame label="Ohren" {
+	     	Switch 		item=karotzResetOhren 	icon="karotz"
+	     	Switch 		item=karotzOhr 			icon="karotz"
+	     	Selection 	item=karotzLinkesOhr    label="Linkes Ohr bewegen"  icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
+	     	Selection 	item=karotzRechtesOhr   label="Rechtes Ohr bewegen" icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
+	     }
+	     Frame label="Kamera" {
+	     	Switch 		item=karotzFoto 		icon="selfCamera"
+	     }
+	     Frame label="Radio" {
+	     	Switch item=karotzRadio
+			Selection item=karotzSender label="Radio Senderauswahl" icon="karotz" mappings=[0="Aus", 1="RTL", 2="RTL 2", 3="FFN", 4="Radio Hannover"]
+	     }
+	     Frame label="Ton" {
+	     	Selection item=karotzSignal label="Signal Ton schalten" icon="siren" mappings=[0="ready", 1="rfid_ok", 2="flush", 3="start", 4="bip1"]
+	     }
+	  }
+}
+
+
+} 

@@ -1,0 +1,306 @@
+//
+// Steuerung des OpenKarotz via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import org.openhab.ui.webapp.internal.servlet.*
+import org.openhab.library.tel.types.CallType
+import org.openhab.core.types.*
+
+//------------------------------------------------------------------------
+//    Globale Variablen
+//------------------------------------------------------------------------
+
+// Die URL zu dem KAROTZ CGI-BIN Verzeichnis, die IP 9.9.9.9 durch die Karotz ID ersetzen
+var String KAROTZ_CGI="http://9.9.9.9/cgi-bin/"
+
+// Die URL zu den MP3 Datein für die Ansage anpassen
+var String MP3_URL = "http://wenzlaff.info/"
+
+// für den Colorpicker zur Steuerung der LED
+var HSBType hsbValue   
+var String  redValue
+var String  greenValue
+var String  blueValue
+
+//------------------------------------------------------------------------
+//    Radio
+//------------------------------------------------------------------------
+rule "Karotz Radio Hannover anschalten"
+ when
+	Item karotzRadio changed
+ then
+	if (karotzRadio.state == ON) {
+		sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://xapp2154659840c40000.f.l.i.lb.core-cdn.net/40000mb/live/app2154659840/w2153906178/live_de_192.mp3")
+	}else {
+		sendHttpGetRequest(KAROTZ_CGI + "sound_control?cmd=quit")
+	}
+end
+
+rule "Karotz Radio Sender auswaehlen"
+ when
+        Item karotzSender received command
+ then
+	logInfo("Karotz Radio:", "Neuen Sender ausgewählt: " + karotzSender)
+	switch(receivedCommand) {
+       
+			// Ausschalten
+		case 0 : sendHttpGetRequest(KAROTZ_CGI + "sound_control?cmd=quit")
+         	// RTL       
+		case 1 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://streaming.radio.rtl.fr/rtl-1-44-96")
+         	// RTL 2
+		case 2 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://streaming.radio.rtl2.fr/rtl2-1-44-96")
+			// FFN
+		case 3 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://player.ffn.de/ffnstream.mp3")
+			// Radio Hannover
+		case 4 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://xapp2154659840c40000.f.l.i.lb.core-cdn.net/40000mb/live/app2154659840/w2153906178/live_de_192.mp3")
+	}
+end
+
+//------------------------------------------------------------------------
+//   Signale
+//------------------------------------------------------------------------
+rule "Karotz Signale auswaehlen"
+ when
+        Item karotzSignal received command
+ then
+		logInfo("Karotz Signal ausgewählt :", "Neues Signal ausgewählt: " + karotzSignal)
+		
+	switch(receivedCommand) {     		
+			// Start
+		case 0 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=ready")
+         	// Rfid Ok    
+		case 1 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=rfid_ok")
+         	// Flush
+		case 2 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=flush")
+			// Start
+		case 3 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=start")
+			// Bip1
+		case 4 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=bip1")
+	}
+end
+//------------------------------------------------------------------------
+//   Ohren
+//------------------------------------------------------------------------
+rule "Karotz Ohren zufällig bewegen"
+ when
+	Item karotzOhr changed
+ then
+	if (karotzOhr.state == ON) { 
+		logInfo("Karotz", "Ohren zufällig bewegen")
+		sendHttpGetRequest(KAROTZ_CGI + "ears_random")
+	}
+end
+
+rule "Karotz linkes Ohr bewegen"
+ when
+	Item karotzLinkesOhr received command
+ then
+		logInfo("Karotz", "Linkes Ohr bewegen um " + receivedCommand)	
+		sendHttpGetRequest(KAROTZ_CGI + "ears?left=" + receivedCommand +  "&right=0&noreset=1")
+end
+
+rule "Karotz rechtes Ohr bewegen"
+ when
+	Item karotzRechtesOhr received command
+ then
+		logInfo("Karotz", "Rechtes Ohr bewegen um " + receivedCommand)	
+		sendHttpGetRequest(KAROTZ_CGI + "ears?left=0&right=" + receivedCommand +  "&noreset=1")
+end
+
+rule "Karotz reset der Ohren"
+ when
+	Item karotzResetOhren received command
+ then
+		logInfo("Karotz", "Ohren Reset")	
+		karotzLinkesOhr.postUpdate(0)
+		karotzRechtesOhr.postUpdate(0)
+		sendHttpGetRequest(KAROTZ_CGI + "ears_reset")
+end
+
+//------------------------------------------------------------------------
+//   Foto
+//------------------------------------------------------------------------
+rule "Karotz macht ein Foto"
+ when
+        Item karotzFoto changed
+ then
+	if (karotzFoto.state == ON) {
+		logInfo("Karotz", "Foto erstellen")
+        sendHttpGetRequest(KAROTZ_CGI + "snapshot?silent=1")
+	}
+end
+
+//------------------------------------------------------------------------
+//   LED Steuerung
+//------------------------------------------------------------------------
+rule "Karotz LED ausschalten"
+ when
+     	Item karotzLedAus changed
+ then
+     	logInfo("Karotz", "schalte die LED des Karotz aus ...")
+     
+		if (karotzLedGruen.state == OFF) {
+			logInfo("Karotz", "schalte die LED des Karotz: AUS")			
+			sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")					
+    	}
+end
+
+rule "Karotz LED Gruen Steuerung"
+ when
+     	Item karotzLedGruen changed
+ then
+     	logInfo("Karotz", "schalte die LED des Karotz ...")
+     
+		if (karotzLedGruen.state == ON) {
+			sendHttpGetRequest(KAROTZ_CGI + "leds?color=00FF00")
+			logInfo("Karotz", "schalte die LED des Karotz: auf Grün an")
+		}
+    	else {
+			sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
+			logInfo("Karotz", "schalte die LED des Karotz: AUS")
+    	}
+end
+
+rule "Karotz LED Rot Steuerung"
+ when
+        Item karotzLedRot changed
+ then
+        logInfo("Karotz", "schalte die LED des Karotz ...")
+
+        if (karotzLedRot.state == ON) {
+             sendHttpGetRequest(KAROTZ_CGI + "leds?color=EE3B3B")
+             logInfo("Karotz", "schalte die LED des Karotz: auf Rot an")
+        }
+        else {
+             sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
+             logInfo("Karotz", "schalte die LED des Karotz: AUS")
+        }
+end
+
+rule "Karotz LED Gelb Steuerung"
+ when
+        Item karotzLedGelb changed
+ then
+        logInfo("Karotz", "schalte die LED des Karotz ...")
+
+        if (karotzLedGelb.state == ON) {
+                sendHttpGetRequest(KAROTZ_CGI + "leds?color=FFD700")
+                logInfo("Karotz", "schalte die LED des Karotz: auf Gelb an")
+        }
+        else {
+                sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
+                logInfo("Karotz", "schalte die LED des Karotz: AUS")
+        }
+end
+
+rule "Karotz LED Blau Steuerung"
+ when
+        Item karotzLedBlau changed
+ then
+        logInfo("Karotz", "schalte die LED des Karotz ...")
+
+        if (karotzLedBlau.state == ON) {
+                sendHttpGetRequest(KAROTZ_CGI + "leds?color=104E8B")
+                logInfo("Karotz", "schalte die LED des Karotz: auf Blau an")
+        }
+        else {
+                sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
+                logInfo("Karotz", "schalte die LED des Karotz: AUS")
+        }
+end
+
+rule "Setzen der LED Farbe per Colorpicker"
+    when
+        Item karotzFarbe changed
+    then   	
+        hsbValue = karotzFarbe.state as HSBType
+        // jeder int Wert ist 0 bis 100 (%)
+        var int redInt = hsbValue.red.intValue
+        var int greenInt = hsbValue.green.intValue
+        var int blueInt = hsbValue.blue.intValue
+        
+        // transform 0..100 nach 0x0..0xffff
+        redInt = (redInt*0xffff)/100
+        greenInt = (greenInt*0xffff)/100
+        blueInt = (blueInt*0xffff)/100
+
+        redValue   = (redInt).toString
+        greenValue   = (greenInt).toString
+        blueValue   = (blueInt).toString
+        
+        logInfo("Karotz", "schalte die LED des Karotz via Colorpicker auf: Rot: " + redValue + " Grün: " + greenValue + " Blau: " + blueValue)
+        
+        sendHttpGetRequest(KAROTZ_CGI + "leds?color=" + redValue + greenValue + blueValue) 		           	              
+end
+
+//------------------------------------------------------------------------
+//   Sprach Ausgabe
+//------------------------------------------------------------------------
+rule "Ansage jeden Tag um 12 Uhr"
+ when
+        Time cron "0 0 12 * * ?"  
+ then
+        logInfo("Karotz", "Karotz 12 Uhr Ansage")    
+        sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "12.mp3")
+end
+
+rule "Ansage jeden Tag um 18 Uhr"
+ when 
+        Time cron "0 0 18 * * ?"   
+ then
+		sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "18.mp3")
+    	logInfo("Karotz", "Karotz 18 Uhr Ansage")
+end
+
+rule "Ansage jeden Tag um 19 Uhr"
+ when
+        Time cron "0 0 19 * * ?"  
+ then
+        logInfo("Karotz", "Karotz 19 Uhr Ansage")    
+        sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "19.mp3")
+end
+
+rule "Ansage jeden Tag um 20 Uhr"
+ when
+        Time cron "0 0 20 * * ?"  
+ then
+        logInfo("Karotz", "Karotz 20 Uhr Ansage")    
+        sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "20.mp3")
+end
+
+rule "Ansage jeden Tag um 22 Uhr"
+ when
+        Time cron "0 0 22 * * ?"  
+ then
+        logInfo("Karotz", "Karotz 22 Uhr Ansage")    
+        sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "10.mp3")
+end
+
+rule "Bei eingehenden Telefonanruf Telefonnummer ansagen"
+ when
+	Item fboxRinging changed from OFF to ON 
+ then
+        val CallType incCall = fboxIncomingCall.state as CallType
+        var callerName = incCall.destNum 
+		logInfo("Ansage eines Telefon Anruf von ", " Nr.:" + callerName)            
+        sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=Hallo%20da%20ruft%20ja%20jemand%20an%20Da%20ruft%20jemand%20mit%20folgender%20Telefon%20Nummer%20an%20" + callerName +"&nocache=0")
+end
+
+//------------------------------------------------------------------------
+//   Systemmeldungen
+//------------------------------------------------------------------------
+rule "Pushover Nachricht wenn Karotz Status sich ändert"
+ when
+	Item cFboxMacOnlineKarotz changed
+ then
+		logInfo("Karotz", "Karotz wurde an bzw. aus geschaltet: " + cFboxMacOnlineKarotz.state)
+		pushover("Karotz wurde geschaltet: " + cFboxMacOnlineKarotz.state)
+end	
+
+
+
+
+
