@@ -1,5 +1,7 @@
-# Meine OpenHAB anpassungen
+# Meine OpenHAB Anpassungen
 
-OpenHAB
+Details siehe http://www.wenzlaff.info
+
+OpenHAB Karotz
 
 Das Verzeichnis karotz-openhab-icon enthält einige Icons für den Karotz
