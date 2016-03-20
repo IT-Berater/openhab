@@ -292,6 +292,18 @@ end
 //------------------------------------------------------------------------
 //   Systemmeldungen
 //------------------------------------------------------------------------
+
+rule "Ini bei Systemstart"
+ when
+	 System started
+ then
+		logInfo("Karotz", "Systemstart")
+		
+		ZitatDesTages.initialize;
+		ZitatDesTagesAutor.initialize;
+		logInfo("Karotz", "Systemstart init Zitat des Tages: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state)
+end	
+
 rule "Pushover Nachricht wenn Karotz Status sich ändert"
  when
 	Item cFboxMacOnlineKarotz changed
