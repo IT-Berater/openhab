@@ -300,6 +300,21 @@ rule "Pushover Nachricht wenn Karotz Status sich ändert"
 		pushover("Karotz wurde geschaltet: " + cFboxMacOnlineKarotz.state)
 end	
 
+//------------------------------------------------------------------------
+//   Zitat des Tages ansagen und per pushover versenden
+//------------------------------------------------------------------------
+rule "Zitat des Tages um 16:16 Uhr ansagen und per pushover versenden"
+ when
+	  Time cron "0 16 16 * * ?" 
+ then
+ 		var zitat = "Das Zitat des Tages lautet: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state
+ 		
+		logInfo("Karotz", zitat)
+		pushover(zitat)
+		
+		sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=" + zitat.encode('UTF-8') + "&nocache=0")  
+end	
+
 
 
 
