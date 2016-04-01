@@ -1,0 +1,155 @@
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import java.text.SimpleDateFormat
+
+ 
+//
+// Steuerung der Wohnung via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+
+// Timer für die TV-Geräte
+var Timer timerTvAn
+var Timer timerTvAus
+var Timer timerTvSAn
+var Timer timerTvSAus
+
+//------------------------------------------------------------------------
+//    TEST ob Pushover läuft
+//------------------------------------------------------------------------
+				
+rule "Sende Pushover Nachricht bei Tastendruck"
+ when
+     Item Test_Push received command ON
+ then
+     var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+     var String timestamp = df.format( new Date() )
+     if (!ZitatDesTages.state.equals("Uninitialized")){
+     	 var String text = ZitatDesTages.state + " von " + ZitatDesTagesAutor.state + " um " + timestamp
+  
+    	 pushover(text)
+     }
+end
+
+
+//------------------------------------------------------------------------
+//    Anwesenheit 
+//------------------------------------------------------------------------
+rule "Sende Pushover Nachricht wenn xxx aus dem Haus geht"
+ when
+     Item cFboxMacOnlineKHandy changed from OPEN to CLOSED 
+ then
+ 			var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+     		var String timestamp = df.format( new Date() )
+     	 	logInfo("Sende Pushover Nachricht", "XXX ist aus dem Hause gegangen")
+     		pushover("Katharina ist aus dem Hause gegangen um " + timestamp)
+end
+
+rule "Sende Pushover Nachricht wenn xxx nach Hause kommt"
+ when
+     Item cFboxMacOnlineKHandy changed from CLOSED to OPEN
+ then	
+  			var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+     		var String timestamp = df.format( new Date() )
+     		logInfo("Sende Pushover Nachricht", "xxxx ist nun zu Hause")
+     		pushover("xxxx ist zu Hause angekommen um " + timestamp) 		
+end
+
+//------------------------------------------------------------------------
+//    Anwesenheit Thomas
+//------------------------------------------------------------------------
+rule "Sende Pushover Nachricht wenn Thomas aus dem Haus geht"
+ when
+     Item cFboxMacOnlineTHandy changed from OPEN to CLOSED 
+ then
+  				var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+     			var String timestamp = df.format( new Date() )
+     	 		logInfo("Sende Pushover Nachricht", "Thomas ist aus dem Hause gegangen")
+     			pushover("Thomas ist aus dem Hause gegangen um " + timestamp)    	
+end
+
+rule "Sende Pushover Nachricht wenn Thomas nach Hause kommt"
+ when
+     Item cFboxMacOnlineTHandy changed from CLOSED to OPEN
+ then	
+  			var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+     		var String timestamp = df.format( new Date() )
+     		logInfo("Sende Pushover Nachricht", "Thomas ist nun zu Hause")
+     		pushover("Thomas ist zu Hause angekommen um " + timestamp) 			
+end
+
+//------------------------------------------------------------------------
+//   TV
+//------------------------------------------------------------------------
+rule "Sende Pushover Nachricht wenn das TV in der Stube AUS geschaltet wird"
+ when
+     Item cFboxMacOnlineTvPana changed from OPEN to CLOSED 
+ then 		 		
+    	if(cFboxMacOnlineTvPana.state==CLOSED) {
+            	timerTvAus= createTimer(now.plusSeconds(300)) [|
+               	logInfo("Sende Pushover Nachricht", "TV in der Stube aus geschaltet")
+     			pushover("TV in der Stube AUS geschaltet")
+            ]
+        } else {
+            if(timerTvAus!=null) {
+                timerTvAus.cancel
+                timerTvAus = null
+            }
+        }    	
+end
+
+rule "Sende Pushover Nachricht wenn das TV in der Stube AN geschaltet wird"
+ when
+     Item cFboxMacOnlineTvPana changed from CLOSED to OPEN 
+ then 		 		
+ 			if(cFboxMacOnlineTvPana.state==OPEN) {
+            	timerTvAn= createTimer(now.plusSeconds(300)) [|
+     			logInfo("Sende Pushover Nachricht", "TV in der Stube AN geschaltet")
+     			pushover("TV in der Stube AN geschaltet")
+     		 ]
+        } else {
+            if(timerTvAn!=null) {
+                timerTvAn.cancel
+                timerTvAn = null
+            }
+        }    	
+end
+
+rule "Sende Pushover Nachricht wenn das TV im Schlafzimmer AUS geschaltet wird"
+ when
+     Item cFboxMacOnlineTvSony changed from OPEN to CLOSED 
+ then 		 		
+    		if(cFboxMacOnlineTvSony.state==CLOSED) {
+            	timerTvSAus= createTimer(now.plusSeconds(300)) [|
+               	logInfo("Sende Pushover Nachricht", "TV im Schlafzimmer aus geschaltet")
+     			pushover("TV im Schlafzimmer AUS geschaltet")
+            ]
+        } else {
+            if(timerTvSAus!=null) {
+                timerTvSAus.cancel
+                timerTvSAus = null
+            }
+        }    	
+end
+
+rule "Sende Pushover Nachricht wenn das TV im Schlafzimmer AN geschaltet wird"
+ when
+     Item cFboxMacOnlineTvSony changed from CLOSED to OPEN 
+ then 		 		
+ 			if(cFboxMacOnlineTvSony.state==OPEN) {
+            	timerTvSAn= createTimer(now.plusSeconds(300)) [|
+     			logInfo("Sende Pushover Nachricht", "TV im Schlafzimmer AN geschaltet")
+     			pushover("TV im Schlafzimmer AN geschaltet")
+     		 ]
+        } else {
+            if(timerTvSAn!=null) {
+                timerTvSAn.cancel
+                timerTvSAn = null
+            }
+        }    	
+end
+
+
+
