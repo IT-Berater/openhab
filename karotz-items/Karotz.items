@@ -5,24 +5,39 @@
 //
 Group gKarotz
 
-Switch karotzLedAus "LED ausschalten"
-Switch karotzLedGruen "LED Grün schalten"
-Switch karotzLedRot "LED Rot schalten"
-Switch karotzLedGelb "LED Gelb schalten"
-Switch karotzLedBlau "LED Blau schalten"
-Color  karotzFarbe "LED Farbe auswählen"
+// LED
+Switch karotzLedAus "LED ausschalten" 		{ autoupdate="false" }
+Switch karotzLedGruen "LED Grün schalten" 	
+Switch karotzLedRot "LED Rot schalten" 		
+Switch karotzLedGelb "LED Gelb schalten" 	
+Switch karotzLedBlau "LED Blau schalten" 	
+Color  karotzFarbe "LED Farbe auswählen" 
 
-Switch karotzOhr "Ohren zufällig bewegen"
+// Ohren
+Switch karotzOhr "Ohren zufällig bewegen" { autoupdate="false" }
 Number karotzLinkesOhr
 Number karotzRechtesOhr
-Switch karotzResetOhren "Ohren reset"
+Switch karotzResetOhren "Ohren reset" { autoupdate="false" }
 
-Switch karotzFoto "Foto erstellen"
-Switch karotzRadio "Radio Hannover schalten"
+// Foto
+String letztesFoto
+Switch karotzFoto 				"Foto erstellen" 		
+Switch karotzFotoAktualisieren 	"Foto aktualisieren" 	
+Switch karotzFotosLoeschen		"Alle Fotos löschen"
+
+// Radio
+Switch karotzRadio "Radio Hannover"
 Number karotzSender
 Number karotzSignal
 
+Number karotzAnsage "Ansagen" 
 
-// Status Abfragen IP des Karotz 9.9.9.9 ersetzen
-String karotzFreierSpeicher "Freien Arbeitsspeicher [%s]"                   { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherWert.js)]" }
-String karotzFreierSpeicherProzent "Freien Arbeitsspeicher in Prozent [%s]" { http="<[http://9.9.9.9/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherProzentWert.js)]" }
+// Status Abfragen
+String karotzFreierSpeicher "Freien Arbeitsspeicher [%s]"           { http="<[http://(pi-adresse-einfügen)/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherWert.js)]" }
+String karotzFreierSpeicherProzent "Freien Arbeitsspeicher [%s %%]" { http="<[http://(pi-adresse-einfügen)/cgi-bin/status:3600000:JS(getKarotzFreienSpeicherProzentWert.js)]" }
+
+// Täglich ein Zitat von https://taeglicheszit.at/
+// http://taeglicheszit.at//zitat-api.php?format=json
+
+String ZitatDesTages "[%s]"        { http="<[http://taeglicheszit.at/zitat-api.php?format=json:86400000:JS(getZitatDesTages.js)]" } 
+String ZitatDesTagesAutor "[%s]"   { http="<[http://taeglicheszit.at/zitat-api.php?format=json:86400000:JS(getZitatDesTagesAutor.js)]" } 
