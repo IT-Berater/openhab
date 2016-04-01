@@ -3,11 +3,17 @@
 //
 // (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
 //
+import org.openhab.core.types.*
 import org.openhab.core.library.types.*
 import org.openhab.model.script.actions.*
 import org.openhab.ui.webapp.internal.servlet.*
 import org.openhab.library.tel.types.CallType
-import org.openhab.core.types.*
+import java.net.URLEncoder
+import java.util.Date
+import java.util.TimeZone
+import java.util.Calendar
+import java.util.Date
+import java.text.SimpleDateFormat
 
 //------------------------------------------------------------------------
 //    Globale Variablen
@@ -24,6 +30,7 @@ var HSBType hsbValue
 var String  redValue
 var String  greenValue
 var String  blueValue
+var String  isLedAn = "OFF"
 
 //------------------------------------------------------------------------
 //    Radio
@@ -46,15 +53,15 @@ rule "Karotz Radio Sender auswaehlen"
 	logInfo("Karotz Radio:", "Neuen Sender ausgewählt: " + karotzSender)
 	switch(receivedCommand) {
        
-			// Ausschalten
+		// Ausschalten
 		case 0 : sendHttpGetRequest(KAROTZ_CGI + "sound_control?cmd=quit")
          	// RTL       
 		case 1 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://streaming.radio.rtl.fr/rtl-1-44-96")
          	// RTL 2
 		case 2 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://streaming.radio.rtl2.fr/rtl2-1-44-96")
-			// FFN
+		// FFN
 		case 3 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://player.ffn.de/ffnstream.mp3")
-			// Radio Hannover
+		// Radio Hannover
 		case 4 : sendHttpGetRequest(KAROTZ_CGI + "sound?url=http://xapp2154659840c40000.f.l.i.lb.core-cdn.net/40000mb/live/app2154659840/w2153906178/live_de_192.mp3")
 	}
 end
@@ -69,16 +76,18 @@ rule "Karotz Signale auswaehlen"
 		logInfo("Karotz Signal ausgewählt :", "Neues Signal ausgewählt: " + karotzSignal)
 		
 	switch(receivedCommand) {     		
-			// Start
-		case 0 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=ready")
+		// Start
+		case 0 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=ready")}
          	// Rfid Ok    
-		case 1 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=rfid_ok")
+		case 1 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=rfid_ok")}
          	// Flush
-		case 2 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=flush")
-			// Start
-		case 3 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=start")
-			// Bip1
-		case 4 : sendHttpGetRequest(KAROTZ_CGI + "sound?id=bip1")
+		case 2 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=flush")}
+		// Start
+		case 3 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=start")}
+		// Bip1
+		case 4 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=bip1")}
+		// Hunde
+		case 5 : {sendHttpGetRequest(KAROTZ_CGI + "sound?id=hunde")}
 	}
 end
 //------------------------------------------------------------------------
@@ -86,17 +95,15 @@ end
 //------------------------------------------------------------------------
 rule "Karotz Ohren zufällig bewegen"
  when
-	Item karotzOhr changed
- then
-	if (karotzOhr.state == ON) { 
+	Item karotzOhr received command ON
+ then	
 		logInfo("Karotz", "Ohren zufällig bewegen")
-		sendHttpGetRequest(KAROTZ_CGI + "ears_random")
-	}
+		sendHttpGetRequest(KAROTZ_CGI + "ears_random")	
 end
 
 rule "Karotz linkes Ohr bewegen"
  when
-	Item karotzLinkesOhr received command
+	Item karotzLinkesOhr received command ON
  then
 		logInfo("Karotz", "Linkes Ohr bewegen um " + receivedCommand)	
 		sendHttpGetRequest(KAROTZ_CGI + "ears?left=" + receivedCommand +  "&right=0&noreset=1")
@@ -104,7 +111,7 @@ end
 
 rule "Karotz rechtes Ohr bewegen"
  when
-	Item karotzRechtesOhr received command
+	Item karotzRechtesOhr received command ON
  then
 		logInfo("Karotz", "Rechtes Ohr bewegen um " + receivedCommand)	
 		sendHttpGetRequest(KAROTZ_CGI + "ears?left=0&right=" + receivedCommand +  "&noreset=1")
@@ -112,7 +119,7 @@ end
 
 rule "Karotz reset der Ohren"
  when
-	Item karotzResetOhren received command
+	Item karotzResetOhren received command ON
  then
 		logInfo("Karotz", "Ohren Reset")	
 		karotzLinkesOhr.postUpdate(0)
@@ -128,9 +135,45 @@ rule "Karotz macht ein Foto"
         Item karotzFoto changed
  then
 	if (karotzFoto.state == ON) {
-		logInfo("Karotz", "Foto erstellen")
-        sendHttpGetRequest(KAROTZ_CGI + "snapshot?silent=1")
-	}
+	logInfo("Karotz", "Ein neues Foto erstellen")
+        sendHttpGetRequest(KAROTZ_CGI + "snapshot?silent=1")    
+        
+        karotzFoto.sendCommand("OFF")                
+	}	
+end
+
+rule "Karotz letztes Foto anzeigen"
+ when
+        Item karotzFotoAktualisieren changed
+ then
+	if (karotzFotoAktualisieren.state == ON) {
+	logInfo("Karotz", "letztes Foto erstellen")
+        
+        var String fotoListe = sendHttpGetRequest(KAROTZ_CGI + "snapshot_list")
+        logInfo("Karotz", "Foto liste: " + fotoListe)
+      
+        var letztesFotoJson = transform("JSONPATH","$..id[-1:]", fotoListe)      
+     
+        var letztesFotoName = letztesFotoJson.replace('[','').replace(']','').replace('"','')
+        logInfo("Karotz", "Letztes Foto ist: " + letztesFotoName)   
+
+	// Das Verzeichnis zu den Fotos "http://(pi-adresse-einfügen)/snapshots/" ist usr/openkarotz/Snapshots
+	executeCommandLine("/home/pi/openhab/configurations/scripts/renameFoto.sh " + letztesFotoName)	  
+	    
+	karotzFotoAktualisieren.sendCommand("OFF")  
+	}	
+end
+
+rule "Alle Fotos vom Karotz löschen"
+ when
+        Item karotzFotosLoeschen changed
+ then
+	if (karotzFotosLoeschen.state == ON) {
+	logInfo("Karotz", "Alle Fotos löschen")
+        sendHttpGetRequest(KAROTZ_CGI + "clear_snapshots")    
+        
+        karotzFotosLoeschen.sendCommand("OFF")                
+	}	
 end
 
 //------------------------------------------------------------------------
@@ -138,14 +181,18 @@ end
 //------------------------------------------------------------------------
 rule "Karotz LED ausschalten"
  when
-     	Item karotzLedAus changed
- then
-     	logInfo("Karotz", "schalte die LED des Karotz aus ...")
-     
-		if (karotzLedGruen.state == OFF) {
+     	Item karotzLedAus received command ON
+ then     			
+ logInfo("Karotz", "Status LED: " + isLedAn)		
+ 		if (isLedAn.equals("ON")) {
 			logInfo("Karotz", "schalte die LED des Karotz: AUS")			
-			sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")					
-    	}
+			sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")		
+			karotzLedGruen.postUpdate("OFF")	
+			karotzLedBlau.postUpdate("OFF")
+			karotzLedGelb.postUpdate("OFF")
+			karotzLedRot.postUpdate("OFF")
+			isLedAn = "OFF"
+			}		   	
 end
 
 rule "Karotz LED Gruen Steuerung"
@@ -157,10 +204,14 @@ rule "Karotz LED Gruen Steuerung"
 		if (karotzLedGruen.state == ON) {
 			sendHttpGetRequest(KAROTZ_CGI + "leds?color=00FF00")
 			logInfo("Karotz", "schalte die LED des Karotz: auf Grün an")
+			isLedAn = "ON"
 		}
     	else {
+    		if (isLedAn.equals("ON")) {
 			sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
 			logInfo("Karotz", "schalte die LED des Karotz: AUS")
+			isLedAn = "OFF"
+		}
     	}
 end
 
@@ -173,10 +224,14 @@ rule "Karotz LED Rot Steuerung"
         if (karotzLedRot.state == ON) {
              sendHttpGetRequest(KAROTZ_CGI + "leds?color=EE3B3B")
              logInfo("Karotz", "schalte die LED des Karotz: auf Rot an")
+             isLedAn = "ON"
         }
         else {
+        if (isLedAn.equals("ON")) {
              sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
              logInfo("Karotz", "schalte die LED des Karotz: AUS")
+             isLedAn = "OFF"        
+             }
         }
 end
 
@@ -189,10 +244,14 @@ rule "Karotz LED Gelb Steuerung"
         if (karotzLedGelb.state == ON) {
                 sendHttpGetRequest(KAROTZ_CGI + "leds?color=FFD700")
                 logInfo("Karotz", "schalte die LED des Karotz: auf Gelb an")
+                isLedAn = "ON"
         }
         else {
+        	if (isLedAn.equals("ON")) {
                 sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
                 logInfo("Karotz", "schalte die LED des Karotz: AUS")
+                 isLedAn = "OFF"
+                }
         }
 end
 
@@ -205,10 +264,14 @@ rule "Karotz LED Blau Steuerung"
         if (karotzLedBlau.state == ON) {
                 sendHttpGetRequest(KAROTZ_CGI + "leds?color=104E8B")
                 logInfo("Karotz", "schalte die LED des Karotz: auf Blau an")
+                isLedAn = "ON"
         }
         else {
+        	if (isLedAn.equals("ON")) {
                 sendHttpGetRequest(KAROTZ_CGI + "leds?color=000000")
                 logInfo("Karotz", "schalte die LED des Karotz: AUS")
+                isLedAn = "OFF"               
+                }
         }
 end
 
@@ -233,7 +296,8 @@ rule "Setzen der LED Farbe per Colorpicker"
         
         logInfo("Karotz", "schalte die LED des Karotz via Colorpicker auf: Rot: " + redValue + " Grün: " + greenValue + " Blau: " + blueValue)
         
-        sendHttpGetRequest(KAROTZ_CGI + "leds?color=" + redValue + greenValue + blueValue) 		           	              
+        sendHttpGetRequest(KAROTZ_CGI + "leds?color=" + redValue + greenValue + blueValue) 		  
+        isLedAn = "ON"         	              
 end
 
 //------------------------------------------------------------------------
@@ -279,54 +343,97 @@ rule "Ansage jeden Tag um 22 Uhr"
         sendHttpGetRequest(KAROTZ_CGI + "sound?url=" + MP3_URL + "10.mp3")
 end
 
-rule "Bei eingehenden Telefonanruf Telefonnummer ansagen"
+rule "Bei eingehenden Telefonanruf die Telefonnummer ansagen"
  when
 	Item fboxRinging changed from OFF to ON 
  then
-        val CallType incCall = fboxIncomingCall.state as CallType
+	    val CallType incCall = fboxIncomingCall.state as CallType
         var callerName = incCall.destNum 
-		logInfo("Ansage eines Telefon Anruf von ", " Nr.:" + callerName)            
-        sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=Hallo%20da%20ruft%20ja%20jemand%20an%20Da%20ruft%20jemand%20mit%20folgender%20Telefon%20Nummer%20an%20" + callerName +"&nocache=0")
+        	          
+	val CallType incCallResolve =   fboxIncomingCallResolved.state as CallType
+		
+	var callerNameResolve = incCallResolve.destNum
+		
+	var text = "Hallo Hallo, ein Telefon Anruf von " + callerNameResolve  + " mit der Nummer " + callerName + " klingelt";
+ 		 
+	logInfo("Ansage eines Telefon Anruf: ", text.encode('UTF-8'))        
+        sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=" + text.encode('UTF-8') +"&nocache=0")
+end
+
+rule "Ansagen Die Bahn fährt gleich ab, immer 8 Min vorher"
+ when
+	Time cron "0 03 12 ? * SUN" or
+	Time cron "0 33 08 ? * SAT" or
+	Time cron "0 58 17 ? * FRI" 
+ then      
+ 	var textAnsage ='Hallo Thomas, die Strassenbahn fährt gleich ab. Mach dich bitte fertig!'
+        logInfo("Karotz", textAnsage.encode('UTF-8'))  
+        sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=" + textAnsage.encode('UTF-8') + "&nocache=0")
+end
+
+rule "Karotz feste Ansage auswaehlen"
+ when
+        Item karotzAnsage received command
+ then
+
+		logInfo("Karotz Ansage ausgewählt :", "Nr.: " + karotzAnsage )
+	     
+		var textAnsage = ''
+			switch(receivedCommand) {     		
+					
+				case 0 : textAnsage = {"Hallo. Hallo lieber Besuch.  Thomas möchte Euch ganz herzlich willkommen heißen. Alles Gute und viel Freude "}    
+				case 1 : textAnsage = {"Man oh man. Mir geht es echt gut"}   
+				case 2 : textAnsage = {"Hallo, was ich mal wissen wollte. Was gibt es eigentlich Neues?"}   
+				case 3 : textAnsage = {"Ha, Ha, Ha das ist aber lustig"}   
+				case 4 : textAnsage = {"Nutze den Tag. Carpe diem"}  
+				case 5 : textAnsage = {"Das Zitat des Tages lautet " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state}			
+				case 6 : textAnsage = {"Die Uhrzeit lautet " +  new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString() 	}
+				case 7 : textAnsage = {"Es ist im Wohnzimmer " + wzHeizungWand.state + " Grad Celsius warm und die Luftfeuchte beträgt " + wzHeizungWandFeuchte.state + " Prozent."}		
+				case 8 : textAnsage = {"Es ist im Arbeitszimmer " + azHeizung.state + " Grad Celsius warm."}						
+			}
+			logInfo("Karotz", "Text Ansagen: " + textAnsage.encode('UTF-8'))  
+			sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=" + textAnsage.encode('UTF-8') + "&nocache=0")  
 end
 
 //------------------------------------------------------------------------
-//   Systemmeldungen
+//   Systemmeldungen und Systen
 //------------------------------------------------------------------------
 
 rule "Ini bei Systemstart"
  when
 	 System started
  then
-		logInfo("Karotz", "Systemstart")
+	logInfo("Karotz", "Systemstart")
 		
-		ZitatDesTages.initialize;
-		ZitatDesTagesAutor.initialize;
-		logInfo("Karotz", "Systemstart init Zitat des Tages: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state)
+	ZitatDesTages.initialize;
+	ZitatDesTagesAutor.initialize;
+	logInfo("Karotz", "Systemstart init Zitat des Tages: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state)
 end	
 
 rule "Pushover Nachricht wenn Karotz Status sich ändert"
  when
 	Item cFboxMacOnlineKarotz changed
  then
-		logInfo("Karotz", "Karotz wurde an bzw. aus geschaltet: " + cFboxMacOnlineKarotz.state)
-		pushover("Karotz wurde geschaltet: " + cFboxMacOnlineKarotz.state)
+	logInfo("Karotz", "Karotz wurde an bzw. aus geschaltet: " + cFboxMacOnlineKarotz.state)
+	pushover("Karotz wurde geschaltet: " + cFboxMacOnlineKarotz.state)
 end	
 
 //------------------------------------------------------------------------
-//   Zitat des Tages ansagen und per pushover versenden
+//   Zitat des Tages täglich ansagen und per pushover versenden
 //------------------------------------------------------------------------
 rule "Zitat des Tages um 16:16 Uhr ansagen und per pushover versenden"
  when
 	  Time cron "0 16 16 * * ?" 
  then
- 		var zitat = "Das Zitat des Tages lautet: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state
- 		
+ 		if (!ZitatDesTages.state.equals("Uninitialized")){
+	 	var zitat = "Das Zitat des Tages lautet: " + ZitatDesTages.state + " von " + ZitatDesTagesAutor.state
+	 		
 		logInfo("Karotz", zitat)
 		pushover(zitat)
-		
+			
 		sendHttpGetRequest(KAROTZ_CGI + "tts?voice=julia&text=" + zitat.encode('UTF-8') + "&nocache=0")  
+		}
 end	
-
 
 
 
