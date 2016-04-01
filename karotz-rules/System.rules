@@ -1,0 +1,39 @@
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import java.text.SimpleDateFormat
+
+ 
+//
+//  Systeminfos von Homematic und System von OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+
+
+//------------------------------------------------------------------------
+//    Sendet Systeminfos um 12 Uhr per Pushover
+//------------------------------------------------------------------------
+				
+rule "Sende Systemstatus per Pushover um 12 Uhr"
+ when
+     Time cron "0 0 12 * * ?" 
+ then    
+  	     var text = "Systeminfo: Systemlaufzeit: " + uptimeFormatted.state + " OpenHab laufzeit: " + openhabUptimeFormatted.state + " Freier Speicher: " + memFreePercent.state + " %"
+  	     
+    	 pushover(text)    
+end
+
+//------------------------------------------------------------------------
+//    Sendet Hausstatus um 9 Uhr per Pushover
+//------------------------------------------------------------------------
+
+rule "Sende Hausstatus per Pushover um 9 Uhr"
+ when
+     Time cron "0 0 9 * * ?" 
+ then    
+  	     var text = "Arbeitszimmer: " + azHeizung.state + " ºC Wohnzimmer: " + wzHeizungWand.state + " ºC " + wzHeizungWandFeuchte.state + " %"
+  	     
+    	 pushover(text)    
+end
+	
