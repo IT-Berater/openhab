@@ -1,0 +1,152 @@
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import java.text.SimpleDateFormat
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.Timer
+ 
+//
+// Steuerung der Homatic Geräte via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+
+var Number watt
+ 
+// Anbieterpreis für KWh incl. MwSt.
+var Number kwhPreis=0.29
+
+// Die URL zu dem KAROTZ CGI-BIN Verzeichnis
+var String KAROTZ_CGI="http://(pi-adresse-eingeben)/cgi-bin/"
+
+//------------------------------------------------------------------------
+//    Pushover wenn Haustür aufgeht oder zugeht
+//------------------------------------------------------------------------
+rule "Pushover versenden wenn Haustür auf und zu geht und bellen"
+ when
+        Item flurKontakt changed
+ then
+	logInfo("Haustür ", "wurde bewegt Status: " + flurKontakt )
+	
+	if (flurKontakt.state == 0){	
+		logInfo("Haustür: ", "zu")
+		pushover("Haustür wurde geschlossen um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+	} 
+    if (flurKontakt.state == 1){	
+		logInfo("Haustür: ", "offen" )
+		pushover("Haustür wurde geöffnet um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+		// Hunde bellen nur wenn wir nicht zu Hause sind
+		if (cFboxMacOnlineTHandy.state == 0){
+			if (cFboxMacOnlineKHandy == 0){
+				sendHttpGetRequest(KAROTZ_CGI + "sound?id=start")
+				sendHttpGetRequest(KAROTZ_CGI + "sound?id=hunde")
+			}
+		}			    
+	}
+end
+
+//------------------------------------------------------------------------
+//    Pushover wenn Fenster im Arbeitszimmer aufgeht oder zugeht
+//------------------------------------------------------------------------
+rule "Pushover versenden wenn Fenster im Arbeitszimmer auf und zu geht"
+ when
+        Item azFensterKontakt changed
+ then
+	logInfo("Arbeitszimmer ", " Fenster wurde bewegt Status: " + azFensterKontakt )
+	
+	if (azFensterKontakt.state == 0){	
+		logInfo("Arbeitszimmer Fenster: ", "zu")
+		pushover("Arbeitszimmer Fenster wurde geschlossen um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+	} 
+    if (azFensterKontakt.state == 1){	
+		logInfo("Arbeitszimmer Fenster: ", "offen" )
+		pushover("Arbeitszimmer Fenster wurde geöffnet um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+	}
+end
+
+//------------------------------------------------------------------------
+//    Pushover wenn Balkontür im Wohnzimmer aufgeht oder zugeht
+//------------------------------------------------------------------------
+rule "Pushover versenden wenn Balkontür im Wohnzimmer auf und zu geht"
+ when
+        Item wzBalkonKontakt changed
+ then
+	logInfo("Balkontür im Wohnzimmer ", "wurde bewegt Status: " + wzBalkonKontakt )
+	
+	if (wzBalkonKontakt.state == 0){	
+		logInfo("Balkontür im Wohnzimmer: ", "zu")
+		pushover("Balkontür im Wohnzimmer wurde geschlossen um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+	} 
+    if (wzBalkonKontakt.state == 1){	
+		logInfo("Balkontür im Wohnzimmer: ", "offen" )
+		pushover("Balkontür im Wohnzimmer wurde geöffnet um " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+	}
+end
+
+//------------------------------------------------------------------------
+//    Pushover Brandmelder angeht
+//------------------------------------------------------------------------
+rule "Pushover versenden Brandmelder"
+ when
+        Item szBrandmelder received command ON
+ then
+	logInfo("Brandmelder ", " ist an Status: " + szBrandmelder )
+	pushover("Brandmelder im Schalfzimmer ist an seit " + new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" ).format(new Date).toString()   )
+
+end
+
+//------------------------------------------------------------------------
+// Leistungsmesser Umrechnung der Wh in KWh und Kosten
+//------------------------------------------------------------------------
+rule "Berechne KWh"
+when
+  Item leistungsmesserGesamtverbrauch changed
+then
+  watt = leistungsmesserGesamtverbrauch.state
+  var Number kwh = watt / 1000
+  leistungsmesserGesamtverbrauchKwh.postUpdate(kwh)
+end
+ 
+rule "Berechne Kosten Strom"
+when 
+  Item leistungsmesserGesamtverbrauchKwh changed
+then
+  var Number kwh = leistungsmesserGesamtverbrauchKwh.state
+  var Number Kosten = kwh * kwhPreis
+  leistungsmesserSumme.postUpdate(Kosten)
+end
+
+//------------------------------------------------------------------------
+//  Drucker wieder ausschalten
+//------------------------------------------------------------------------
+rule "Drucker automatisch ausschalten"
+when
+  Item azDruckerSchalter received update ON
+then
+		logInfo("Drucker ", " Status: " + azDruckerSchalter)
+
+      	createTimer(now.plusMinutes(30))[|
+      	  logInfo("Drucker ", " wird ausgeschaltet")
+          azDruckerSchalter.sendCommand(OFF)]
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
