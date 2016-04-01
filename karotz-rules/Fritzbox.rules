@@ -1,0 +1,35 @@
+import org.openhab.core.types.*
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import org.openhab.library.tel.types.CallType
+import java.util.Date
+import java.text.SimpleDateFormat
+
+//
+// Steuerung des Karotz via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+
+//------------------------------------------------------------------------
+//    Tel
+//------------------------------------------------------------------------
+rule "Bei eingehenden Telefonanruf ein Pushover versenden"
+ when
+	Item fboxRinging changed from OFF to ON 
+ then
+    val CallType incCall = fboxIncomingCall.state as CallType
+    var callerName = incCall.destNum 
+        
+    var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+    var String timestamp = df.format( new Date() )
+		          
+		val CallType incCallResolve =   fboxIncomingCallResolved.state as CallType
+		
+		var callerNameResolve = incCallResolve.destNum
+		
+		var text = "Telefon Anruf von " + callerNameResolve  + " Tel. Nr. " + callerName + " um "  + timestamp;
+		
+      pushover(text)
+      logInfo("Telefonanruf: ",   text )  
+end
