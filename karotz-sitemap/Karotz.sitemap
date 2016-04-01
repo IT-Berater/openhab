@@ -1,40 +1,214 @@
-sitemap Karotz label="Karotz"
+//
+// Sitemap für OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+sitemap Haus label="Hauptmenue"
 {
 	
-
 Frame {
-        Group item=gKarotz label="Karotz" icon="karotz" {
-        	 
-         Frame label="System Info" {
-         	Text 		item=karotzFreierSpeicherProzent 	icon="selfMemory"
-			Text 		item=karotzFreierSpeicher 			icon="selfMemory"
-		 } 
-		 Frame label="LED"{
-		 	Switch		item=karotzLedAus		icon="karotz"
-			Switch 		item=karotzLedRot 		icon="karotzRot"
-			Switch 		item=karotzLedGelb 		icon="karotzGelb"
-			Switch 		item=karotzLedGruen 	icon="karotzGruen"
-			Switch 		item=karotzLedBlau 		icon="karotzBlau"
-			Colorpicker item=karotzFarbe 		icon="slider"
-	        }
-	     Frame label="Ohren" {
-	     	Switch 		item=karotzResetOhren 	icon="karotz"
-	     	Switch 		item=karotzOhr 			icon="karotz"
-	     	Selection 	item=karotzLinkesOhr    label="Linkes Ohr bewegen"  icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
-	     	Selection 	item=karotzRechtesOhr   label="Rechtes Ohr bewegen" icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
-	     }
-	     Frame label="Kamera" {
-	     	Switch 		item=karotzFoto 		icon="selfCamera"
-	     }
-	     Frame label="Radio" {
-	     	Switch item=karotzRadio
-			Selection item=karotzSender label="Radio Senderauswahl" icon="karotz" mappings=[0="Aus", 1="RTL", 2="RTL 2", 3="FFN", 4="Radio Hannover"]
-	     }
-	     Frame label="Ton" {
-	     	Selection item=karotzSignal label="Signal Ton schalten" icon="siren" mappings=[0="ready", 1="rfid_ok", 2="flush", 3="start", 4="bip1"]
-	     }
-	  }
+        Group item=gWohnung label="Wohnung" icon="groundfloor" {
+        	
+        	Switch item=Reload_Datapoints
+        	
+	        Group item=Arbeitszimmer label="Arbeitszimmer" icon="groundfloor" {
+		       Frame label="Fenster" {
+		        Text item=azFensterKontakt icon="contact"
+		        Text item=azFensterKontaktAccu icon="accu"   	   		        
+		        }    
+		       Frame label="Heizung" {
+		        Text item=azHeizung  icon="heating"      
+		        Text item=azHeizungAccu	icon="accu"   	
+		        Text item=azHeizungVentil       
+		        Setpoint item=azHeizungSollTemp step=0.5 minValue=15 maxValue=30 icon="heating" 	        
+		        }
+		       Frame label="Drucker" {
+		        Switch item=azDruckerSchalter icon="selfSocket"
+		        Text item=azDruckerAccu icon="accu"   		        
+		        }   
+		       Frame label="Wemo" {
+		        Switch item=wemoSchalter icon="selfSocket"
+		        Text item=wemoBewegung  icon="selfMotion" 		        
+		        }   
+		    }	    
+		    Group item=Flur label="Flur" icon="groundfloor" {
+		       Frame label="Haustür" {
+		        Text item=flurKontakt icon="frontdoor"
+		        Text item=flurKontaktAccu icon="accu"   	  		        
+		        }    		        
+		     }
+		     Group item=Wohnzimmer label="Wohnzimmer" icon="groundfloor" {
+		       Frame label="Terrasse" {
+		        Text item=wzBalkonKontakt icon="frontdoor" 
+		        Text item=wzBalkonAccu icon="accu"   	   		        
+		        }    
+		       Frame label="Wandthermostat" {
+		       	Text item=wzHeizungWandFeuchte
+		        Text item=wzHeizungWand icon="heating" 
+		        Text item=wzHeizungWandAccu icon="accu"   	  		        
+		        Text item=wzHeizungWandVentil
+		        Setpoint item=wzHeizungWandSollTemp   step=0.5 minValue=15 maxValue=30	icon="heating" 		        
+		       }    	
+		      Frame label="Heizungsventil" {
+		       	Text item=wzHeizungVentil
+		        Text item=wzHeizungAccu icon="accu"   			        
+		       }    				        
+		     }            
+		      Group item=Schlafzimmer label="Schlafzimmer" icon="groundfloor" {
+		       Frame label="Brandmelder" {
+		        Switch item=szBrandmelder icon="fire"
+		        Text   item=szBrandmelderAccu icon="accu"   	   		        
+		        }    		        
+		     }           
+		      Group item=gHomematic label="Leistungsmessung" icon="groundfloor" {
+		       Frame label="Leistungsmesser" {
+		       	Text    item=leistungsmesserFrequenz
+		        Text    item=leistungsmesserSpannung
+		        Text    item=leistungsmesserStrom
+		        Text    item=leistungsmesserLeistung    		   
+		        Text    item=leistungsmesserGesamtverbrauch	   
+		        Text    item=leistungsmesserGesamtverbrauchKwh	   
+		        Text    item=leistungsmesserSumme        
+		        Switch  item=leistungsmesserSchalten   
+		      
+		        }    		
+		       Frame label="Leistungsdiagramm" icon="chart" {
+		         Switch item=leistungsmesserChartIntervall label="Leistungsverlauf" mappings=[0="Stunde", 1="Tag", 2="Woche"]
+		         Chart item=leistungsmesserLeistung period=h refresh=30000 visibility=[leistungsmesserChartIntervall==0, leistungsmesserChartIntervall=="Uninitialized"]
+		         Chart item=leistungsmesserLeistung period=D refresh=30000 visibility=[leistungsmesserChartIntervall==1]
+		         Chart item=leistungsmesserLeistung period=W refresh=30000 visibility=[leistungsmesserChartIntervall==2]
+            	 }      		 
+           	   Frame label="Stromdiagramm" icon="chart" {
+		         Switch item=leistungsmesserStromChartIntervall label="Stromverlauf" mappings=[0="Stunde", 1="Tag", 2="Woche"]
+		         Chart item=leistungsmesserStrom period=h refresh=30000 visibility=[leistungsmesserStromChartIntervall==0, leistungsmesserStromChartIntervall=="Uninitialized"]
+		         Chart item=leistungsmesserStrom period=D refresh=30000 visibility=[leistungsmesserStromChartIntervall==1]
+		         Chart item=leistungsmesserStrom period=W refresh=30000 visibility=[leistungsmesserStromChartIntervall==2]
+            	 }      		                      
+		     }              		     		     
+	  }               
 }
 
+Frame {
+        Group item=gSystem label="System Info" icon="info" {
+           Frame label="Laufzeit" {
+           		Text 	item=uptimeFormatted 		  icon="selfRuntime"
+           		Text 	item=openhabUptimeFormatted   icon="selfRuntime"        
+           }
+           Frame label="Arbeitsspeicher (RAM)" {
+        	  	Text	item=memTotal icon="selfMemory"
+           		Text 	item=memUsedPercent       
+           		Text 	item=memActualFree
+           		Text 	item=memFreePercent
+        	}
+        	Frame label="Speicher SDKarte" {
+        	  	Text  item=fileSystemFree icon="selfHarddisk"
+        	}
+       	
+           Frame label="Zitat des Tages" {
+        	  	Text  item=ZitatDesTages
+        	  	Text  item=ZitatDesTagesAutor
+        	  	Switch  item=Test_Push
+        	}
+      }
+}
 
-} 
+Frame label="Karotz" {
+		 Group item=gKarotz label="Kamera" icon="karotz" {
+		 	 Frame label="Kamera" {
+		 	 	Switch		item=karotzFotosLoeschen		icon="selfCamera"  	     
+		     	Image       item=letztesFoto  				url="http://10.0.7.29/snapshots/snapshot.jpg" 
+		     	Switch		item=karotzFotoAktualisieren 	icon="selfCamera"  
+		     	Switch 		item=karotzFoto 				icon="selfCamera" 		    
+		     }
+		 }
+		 
+        Group item=gKarotz label="Karotz" icon="karotz" {
+        		      	 
+	         Frame label="System Info" {
+	         	Text 		item=cFboxMacOnlineKarotz 			icon="karotz"	
+	         	Text 		item=karotzFreierSpeicherProzent 	icon="selfMemory"
+				Text 		item=karotzFreierSpeicher 			icon="selfMemory"
+			 } 
+			 Frame label="LED"{
+			 	Switch		item=karotzLedAus		icon="karotz"
+				Switch 		item=karotzLedRot 		icon="karotzRot"
+				Switch 		item=karotzLedGelb 		icon="karotzGelb"
+				Switch 		item=karotzLedGruen 	icon="karotzGruen"
+				Switch 		item=karotzLedBlau 		icon="karotzBlau"
+				Colorpicker item=karotzFarbe 		icon="slider"
+		        }
+		     Frame label="Ohren" {
+		     	Switch 		item=karotzResetOhren 	icon="karotz"
+		     	Switch 		item=karotzOhr 			icon="karotz"
+		     	Selection 	item=karotzLinkesOhr    label="Linkes Ohr bewegen"  icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
+		     	Selection 	item=karotzRechtesOhr   label="Rechtes Ohr bewegen" icon="karotz"  mappings=[0="0", 1="1", 2="2", 3="3", 4="4", 5="5", 6="6", 7="7", 8="8", 9="9", 10="10", 11="11", 12="12", 13="13", 14="14", 15="15", 16="16"]
+		     }	        
+		     Frame label="Radio" {
+		     	Switch item=karotzRadio
+				Selection item=karotzSender label="Radio Senderauswahl" icon="karotz" mappings=[0="Aus", 1="RTL", 2="RTL 2", 3="FFN", 4="Radio Hannover"]
+		     }
+		     Frame label="Ton" {
+		     	Selection item=karotzAnsage label="Ansagen"             icon="karotz" mappings=[0="Besuch begrüssen", 1="Mir gehts gut", 2="Was gibt es Neues", 3="Ha, Ha, Ha, wie lustig", 4="Nutze den Tag", 5="Zitat des Tages", 6="Uhrzeit ansagen", 7="Temperatur Wohnzimmer ansagen", 8="Temperatur Arbeitszimmer ansagen"]
+		     	Selection item=karotzSignal label="Signal Ton schalten" icon="siren"  mappings=[0="ready", 1="rfid_ok", 2="flush", 3="start", 4="bip1", 5="hunde"]
+		     }     
+	  }	  
+}
+	    	  
+Frame {
+	Group item=gTelefon label="Fritzbox" { 	
+		
+		Frame label="Wifi" {
+		       	Text 	item=fboxWanIP
+		       	Switch 	item=fboxWifi24 				icon="network"
+		       	Switch 	item=fboxWifi50 				icon="network"
+		      	Switch 	item=fboxGuestWifi 				icon="network"
+		       	Switch 	item=fboxRinging 				icon="self-siren"
+			    Text 	item=fboxIncomingCallResolved 	icon="phone" 
+		       	Text 	item=fboxIncomingCall 			icon="phone"
+		       	Text 	item=fboxOutgoingCall 			icon="phone"
+			    Text 	item=fboxMissedCalls  			icon="phone"
+		}
+    }
+}
+
+Frame {
+	Group item=gAnwesenheit label="Anwesenheit" icon="selfMotion"{ 	
+		
+    	Frame label="Anwesenheit" {
+		       	Text 	item=cFboxMacOnlineTHandy  		icon="selfMotion"
+		       	Text 	item=cFboxMacOnlineKHandy		icon="selfMotion"	
+		       	Switch	item=anwesenheitChartPeriode    label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+		       	Chart 	item=gAnwesenheitChart          period=h refresh=300 visibility=[anwesenheitChartPeriode==0, anwesenheitChartPeriode=="Uninitialized"]
+				Chart 	item=gAnwesenheitChart 			period=D refresh=1800 visibility=[anwesenheitChartPeriode==1]
+				Chart 	item=gAnwesenheitChart		    period=W refresh=3600 visibility=[anwesenheitChartPeriode==2]	
+				Chart 	item=gAnwesenheitChart		    period=M refresh=36000 visibility=[anwesenheitChartPeriode==3]	
+		       	Text	item=cFboxMacOnlineTIpad		icon="selfMotion"		       			       		
+		}      		
+	} 
+}
+
+Frame {
+	Group item=gTv label="TV" icon="television" { 	
+		
+		Frame label="TV Panasonic" {
+				Text 	item=cFboxMacOnlineTvPana 		  icon="television"			
+				// h, 4h, 12h, D, 3D, W, 2W, M, 2M, 4M, Y
+				Switch	item=tvPanaChartPeriode             label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+		       	Chart 	item=cFboxMacOnlineTvPana           period=h refresh=300 visibility=[tvPanaChartPeriode==0, tvPanaChartPeriode=="Uninitialized"]
+				Chart 	item=cFboxMacOnlineTvPana 			period=D refresh=1800 visibility=[tvPanaChartPeriode==1]
+				Chart 	item=cFboxMacOnlineTvPana		    period=W refresh=3600 visibility=[tvPanaChartPeriode==2]	
+				Chart 	item=cFboxMacOnlineTvPana		    period=M refresh=36000 visibility=[tvPanaChartPeriode==3]			            	
+		}   	
+		Frame label="TV Sony" {			
+				Text 	item=cFboxMacOnlineTvSony 		  icon="television"
+				// h, 4h, 12h, D, 3D, W, 2W, M, 2M, 4M, Y
+				Switch	item=tvSonyChartPeriode             label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+		       	Chart 	item=cFboxMacOnlineTvSony           period=h refresh=300 visibility=[tvSonyChartPeriode==0, tvSonyChartPeriode=="Uninitialized"]
+				Chart 	item=cFboxMacOnlineTvSony 			period=D refresh=1800 visibility=[tvSonyChartPeriode==1]
+				Chart 	item=cFboxMacOnlineTvSony		    period=W refresh=3600 visibility=[tvSonyChartPeriode==2]	
+				Chart 	item=cFboxMacOnlineTvSony		    period=M refresh=36000 visibility=[tvSonyChartPeriode==3]			            	
+		}   	
+	} 
+}
+
+} // ENDE
