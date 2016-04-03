@@ -8,9 +8,7 @@ sitemap Haus label="Hauptmenue"
 	
 Frame {
         Group item=gWohnung label="Wohnung" icon="groundfloor" {
-        	
-        	Switch item=Reload_Datapoints
-        	
+         	
 	        Group item=Arbeitszimmer label="Arbeitszimmer" icon="groundfloor" {
 		       Frame label="Fenster" {
 		        Text item=azFensterKontakt icon="contact"
@@ -60,7 +58,7 @@ Frame {
 		        Text   item=szBrandmelderAccu icon="accu"   	   		        
 		        }    		        
 		     }           
-		      Group item=gHomematic label="Leistungsmessung" icon="groundfloor" {
+		      Group item=gHomematic label="Leistungsmessung" icon="selfSocket"{
 		       Frame label="Leistungsmesser" {
 		       	Text    item=leistungsmesserFrequenz
 		        Text    item=leistungsmesserSpannung
@@ -69,17 +67,16 @@ Frame {
 		        Text    item=leistungsmesserGesamtverbrauch	   
 		        Text    item=leistungsmesserGesamtverbrauchKwh	   
 		        Text    item=leistungsmesserSumme        
-		        Switch  item=leistungsmesserSchalten   
-		      
+		        Switch  item=leistungsmesserSchalten   		   		      
 		        }    		
-		       Frame label="Leistungsdiagramm" icon="chart" {
-		         Switch item=leistungsmesserChartIntervall label="Leistungsverlauf" mappings=[0="Stunde", 1="Tag", 2="Woche"]
+		       Frame label="Leistungsdiagramm"  {
+		         Switch item=leistungsmesserChartIntervall label="Leistungsverlauf" icon="chart" mappings=[0="Stunde", 1="Tag", 2="Woche"]
 		         Chart item=leistungsmesserLeistung period=h refresh=30000 visibility=[leistungsmesserChartIntervall==0, leistungsmesserChartIntervall=="Uninitialized"]
 		         Chart item=leistungsmesserLeistung period=D refresh=30000 visibility=[leistungsmesserChartIntervall==1]
 		         Chart item=leistungsmesserLeistung period=W refresh=30000 visibility=[leistungsmesserChartIntervall==2]
             	 }      		 
-           	   Frame label="Stromdiagramm" icon="chart" {
-		         Switch item=leistungsmesserStromChartIntervall label="Stromverlauf" mappings=[0="Stunde", 1="Tag", 2="Woche"]
+           	   Frame label="Stromdiagramm" {
+		         Switch item=leistungsmesserStromChartIntervall label="Stromverlauf" icon="chart" mappings=[0="Stunde", 1="Tag", 2="Woche"]
 		         Chart item=leistungsmesserStrom period=h refresh=30000 visibility=[leistungsmesserStromChartIntervall==0, leistungsmesserStromChartIntervall=="Uninitialized"]
 		         Chart item=leistungsmesserStrom period=D refresh=30000 visibility=[leistungsmesserStromChartIntervall==1]
 		         Chart item=leistungsmesserStrom period=W refresh=30000 visibility=[leistungsmesserStromChartIntervall==2]
@@ -87,12 +84,13 @@ Frame {
 		     }              		     		     
 	  }               
 }
-
 Frame {
         Group item=gSystem label="System Info" icon="info" {
            Frame label="Laufzeit" {
-           		Text 	item=uptimeFormatted 		  icon="selfRuntime"
-           		Text 	item=openhabUptimeFormatted   icon="selfRuntime"        
+           		Text 	item=uptimeFormatted 	icon="selfRuntime"
+           		Text 	item=openhabUptimeFormatted   icon="selfRuntime"    
+           		Switch  item=Reload_Datapoints    
+           		Switch  item=openHabRestart
            }
            Frame label="Arbeitsspeicher (RAM)" {
         	  	Text	item=memTotal icon="selfMemory"
@@ -111,19 +109,8 @@ Frame {
         	}
       }
 }
-
-Frame label="Karotz" {
-		 Group item=gKarotz label="Kamera" icon="karotz" {
-		 	 Frame label="Kamera" {
-		 	 	Switch		item=karotzFotosLoeschen		icon="selfCamera"  	     
-		     	Image       item=letztesFoto  				url="http://10.0.7.29/snapshots/snapshot.jpg" 
-		     	Switch		item=karotzFotoAktualisieren 	icon="selfCamera"  
-		     	Switch 		item=karotzFoto 				icon="selfCamera" 		    
-		     }
-		 }
-		 
-        Group item=gKarotz label="Karotz" icon="karotz" {
-        		      	 
+Frame {				 
+        Group item=gKarotz label="Karotz" icon="karotz" {        		      	 
 	         Frame label="System Info" {
 	         	Text 		item=cFboxMacOnlineKarotz 			icon="karotz"	
 	         	Text 		item=karotzFreierSpeicherProzent 	icon="selfMemory"
@@ -151,11 +138,20 @@ Frame label="Karotz" {
 		     	Selection item=karotzAnsage label="Ansagen"             icon="karotz" mappings=[0="Besuch begrüssen", 1="Mir gehts gut", 2="Was gibt es Neues", 3="Ha, Ha, Ha, wie lustig", 4="Nutze den Tag", 5="Zitat des Tages", 6="Uhrzeit ansagen", 7="Temperatur Wohnzimmer ansagen", 8="Temperatur Arbeitszimmer ansagen"]
 		     	Selection item=karotzSignal label="Signal Ton schalten" icon="siren"  mappings=[0="ready", 1="rfid_ok", 2="flush", 3="start", 4="bip1", 5="hunde"]
 		     }     
-	  }	  
-}
-	    	  
+	  }	  	 
+}	
+Frame {				       
+	   Group item=gKarotz label="Kamera" icon="karotz" {
+		 	 Frame label="Kamera" {
+		 	 	Switch		item=karotzFotosLoeschen		icon="selfCamera"  	     
+		     	Image       item=letztesFoto  				url="http://(ip-karotz)/snapshots/snapshot.jpg" 
+		     	Switch		item=karotzFotoAktualisieren 	icon="selfCamera"  
+		     	Switch 		item=karotzFoto 				icon="selfCamera" 		    
+		     }
+		 }
+}	    	 
 Frame {
-	Group item=gTelefon label="Fritzbox" { 	
+	Group item=gTelefon label="Fritzbox" icon="phone"{ 	
 		
 		Frame label="Wifi" {
 		       	Text 	item=fboxWanIP
@@ -177,7 +173,7 @@ Frame {
     	Frame label="Anwesenheit" {
 		       	Text 	item=cFboxMacOnlineTHandy  		icon="selfMotion"
 		       	Text 	item=cFboxMacOnlineKHandy		icon="selfMotion"	
-		       	Switch	item=anwesenheitChartPeriode    label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+		       	Switch	item=anwesenheitChartPeriode    icon="chart" label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
 		       	Chart 	item=gAnwesenheitChart          period=h refresh=300 visibility=[anwesenheitChartPeriode==0, anwesenheitChartPeriode=="Uninitialized"]
 				Chart 	item=gAnwesenheitChart 			period=D refresh=1800 visibility=[anwesenheitChartPeriode==1]
 				Chart 	item=gAnwesenheitChart		    period=W refresh=3600 visibility=[anwesenheitChartPeriode==2]	
@@ -186,23 +182,22 @@ Frame {
 		}      		
 	} 
 }
-
 Frame {
 	Group item=gTv label="TV" icon="television" { 	
 		
 		Frame label="TV Panasonic" {
-				Text 	item=cFboxMacOnlineTvPana 		  icon="television"			
+				Text 	item=cFboxMacOnlineTvPana icon="television"			
 				// h, 4h, 12h, D, 3D, W, 2W, M, 2M, 4M, Y
-				Switch	item=tvPanaChartPeriode             label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+				Switch	item=tvPanaChartPeriode             icon="chart" label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
 		       	Chart 	item=cFboxMacOnlineTvPana           period=h refresh=300 visibility=[tvPanaChartPeriode==0, tvPanaChartPeriode=="Uninitialized"]
 				Chart 	item=cFboxMacOnlineTvPana 			period=D refresh=1800 visibility=[tvPanaChartPeriode==1]
 				Chart 	item=cFboxMacOnlineTvPana		    period=W refresh=3600 visibility=[tvPanaChartPeriode==2]	
 				Chart 	item=cFboxMacOnlineTvPana		    period=M refresh=36000 visibility=[tvPanaChartPeriode==3]			            	
 		}   	
 		Frame label="TV Sony" {			
-				Text 	item=cFboxMacOnlineTvSony 		  icon="television"
+				Text 	item=cFboxMacOnlineTvSony icon="television"
 				// h, 4h, 12h, D, 3D, W, 2W, M, 2M, 4M, Y
-				Switch	item=tvSonyChartPeriode             label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
+				Switch	item=tvSonyChartPeriode             icon="chart"label="Zeitspanne" mappings=[0="Stunde", 1="Tag", 2="Woche", 3="Monat"]       
 		       	Chart 	item=cFboxMacOnlineTvSony           period=h refresh=300 visibility=[tvSonyChartPeriode==0, tvSonyChartPeriode=="Uninitialized"]
 				Chart 	item=cFboxMacOnlineTvSony 			period=D refresh=1800 visibility=[tvSonyChartPeriode==1]
 				Chart 	item=cFboxMacOnlineTvSony		    period=W refresh=3600 visibility=[tvSonyChartPeriode==2]	
@@ -210,5 +205,4 @@ Frame {
 		}   	
 	} 
 }
-
 } // ENDE
