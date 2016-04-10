@@ -1,0 +1,27 @@
+
+//
+// System Zugriff
+//
+// Binding: https://github.com/openhab/openhab/wiki/Systeminfo-Binding
+// 
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+// 
+
+//  600000 = 10 min
+// 1800000 = 30 min = halbe Stunde
+Group gSystem
+
+String uptimeFormatted  		"Das System läuft seit [%s]" (System) { systeminfo="UptimeFormatted:1800000" }
+String openhabUptimeFormatted   "OpenHab läuft seit [%s]" 	 (System) { systeminfo="ProcessUptimeFormatted:1800000:$$" }
+
+// Arbeitsspeicher RAM
+Number memTotal          "Gesamtspeicher [%.1f MB]" 	     (System) { systeminfo="MemTotal:1800000" }
+Number memUsedPercent    "Speicher benutzt [%.1f %%]" 	     (System) { systeminfo="MemUsedPercent:1800000" }
+Number memActualFree     "Speicher aktuell frei [%.1f MB]"   (System) { systeminfo="MemActualFree:1800000" }
+Number memFreePercent    "Speicher frei [%.1f %%]"            (System) { systeminfo="MemFreePercent:600000" }
+
+// SDKarten Speicher
+Number fileSystemFree  "Speicher SDKarte frei [%.1f MB]"  (System) { systeminfo="FileSystemFree:600000:/" }
+
+// Schalter für den openHab Restart
+Switch openHabRestart   "Openhab Restart" (System) {exec=">[ON:sudo /etc/init.d/openhab restart]" ,autoupdate="false"}
