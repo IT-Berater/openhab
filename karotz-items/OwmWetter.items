@@ -1,0 +1,17 @@
+//
+// Homematic Zugriff über auf das Wetter API von OpenWeatherMap
+//
+// 
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+// 
+
+Number   owmFeuchte      			"Feuchte [%d %%]"        						{weather="locationId=home-OWM, type=atmosphere, property=humidity"}
+Number   owmTemperatur   			"Temperatur [%.2f °C]"   						{weather="locationId=home-OWM, type=temperature, property=current"}
+Number   owmLuftdruck    			"Luftdruck [%.2f hPa]"   						{weather="locationId=home-OWM, type=atmosphere, property=pressure"}
+String   owmLuftdruckTrend    		"Luftdruck Trend [%s]"   						{weather="locationId=home-OWM, type=atmosphere, property=pressureTrend"}
+Number   owmWindgeschwindigkeit     "Windgeschwindigkeit [%.2f km/h]"    			{weather="locationId=home-OWM, type=wind, property=speed"}
+String   owmWindrichtung            "Windrichtung [%s]"     			 			{weather="locationId=home-OWM, type=wind, property=direction"}
+Number   owmWindgrad    			"Windrichtungn in Grad [%.0f °]"   				{weather="locationId=home-OWM, type=wind, property=degree"}
+Number   owmWolken   				"Bewölkung [%.0f %%]"  							{weather="locationId=home-OWM, type=clouds, property=percent"}
+Number   owmRegen          			"Regen der letzten 3 Stunden [%.2f mm/h]"   	{weather="locationId=home-OWM, type=precipitation, property=rain"}
+Number   owmSchnee      			"Schnee der letzten 3 Stunden [%.2f mm/h]"   	{weather="locationId=home-OWM, type=precipitation, property=snow"}
