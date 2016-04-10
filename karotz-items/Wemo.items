@@ -1,0 +1,16 @@
+//
+// Wemo Zugriff
+//
+// 
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+// 
+
+// Gefundene Wemo Geräte
+// [.o.b.wemo.internal.WemoBinding:376  ] - Wemo Device with UDN 'Socket-1_0-' discovered
+// [.o.b.wemo.internal.WemoBinding:376  ] - Wemo Device with UDN 'Sensor-1_0-' discovered
+
+// Netz Schalter
+Switch wemoSchalter    "Wemo Schalter"       {wemo="Socket-1_0-"}
+
+// Bewegungssensor wenn bewegung erkannt 1 sonst 0
+Switch wemoBewegung    "Wemo Bewegung [MAP(an-aus.map):%d]"    {wemo="Sensor-1_0-"}
