@@ -1,0 +1,18 @@
+//
+// Steuerung des Gruppen via OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+
+// Gruppen
+Group gWohnung 	// die Gruppe für die ganze Wohnung
+
+Group Arbeitszimmer  	"Arbeitszimmer" <arbeit>        (gWohnung)
+Group Wohnzimmer		"Wohnzimmer"	<stube>			(gWohnung)
+Group Schlafzimmer 		"Schlafzimmer"	<bett>  		(gWohnung)
+Group Kueche			"Küche" 		<kueche>		(gWohnung)
+Group Flur				"Flur"   		<flur>			(gWohnung)
+Group Bad				"Bad"			<bad>			(gWohnung)
+Group Terrasse	        "Terrasse"      <terrasse>      (gWohnung)
+
+// Pushover
+Switch Test_Push         "Sende Test Pushover Nachricht"  (Arbeitszimmer)
