@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-# Auslesen der Systemtemperatur des Raspberry Pi via OpenHAB. 
+# Auslesen der Systemtemperatur des Raspberry Pi für openHAB. 
 #
 # (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
 #
