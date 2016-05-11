@@ -10,6 +10,11 @@ import java.text.SimpleDateFormat
 // (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
 //
 
+// Die URL mit dem KEY zu dem ThingSpeak Service z.B. GET https://api.thingspeak.com/update?api_key=<write-key>&field1=0
+// Kanal mit der Systemtemperatur des Rasp. Pi https://thingspeak.com/channels/51786
+var String THINGSPEAK_SYSTEM_URL="https://api.thingspeak.com/update?key=<write-key>" 
+// Kanal mit dem Wetter aus Langenhagen https://thingspeak.com/channels/44925
+var String THINGSPEAK_WETTER_URL="https://api.thingspeak.com/update?key=<write-key>"
 
 //------------------------------------------------------------------------
 //    Sendet Systeminfos um 12 Uhr per Pushover
@@ -22,6 +27,21 @@ rule "Sende Systemstatus per Pushover um 12 Uhr"
   	     var text = "Systeminfo: Systemlaufzeit: " + uptimeFormatted.state + " OpenHab laufzeit: " + openhabUptimeFormatted.state + " Freier Speicher: " + memFreePercent.state + " %"
   	     
     	 pushover(text)    
+end
+
+//------------------------------------------------------------------------
+//    Sendet Temperatur, Luftdruck und Status aus Langenhagen an ThingSpeak
+//------------------------------------------------------------------------
+				
+rule "Sende Temperatur, Luftfeuchte und Status alle 30 Minuten an ThingSpeak.com"
+ when
+       Time cron "0 0/30 * * * ?"  
+ then    
+ 	    var text  =  "&field1=" + String::format("%.2f%%20", (owmTemperatur.state as DecimalType).floatValue()) + "&field2=" + String::format("%.2f%%20", (owmFeuchte.state as DecimalType).floatValue()) 
+ 	    var status = "&status=Temperatur%20" + String::format("%.2f", (owmTemperatur.state as DecimalType).floatValue()) + "%20Grad%20C%20Feuchte%20" +String::format("%.2f%%20", (owmFeuchte.state as DecimalType).floatValue()) + "%20Prozent"
+ 	    var sende = THINGSPEAK_WETTER_URL + text + status
+ 	    logInfo("System", sende)
+    	sendHttpGetRequest(sende)
 end
 
 //------------------------------------------------------------------------
