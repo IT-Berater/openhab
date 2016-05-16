@@ -205,4 +205,15 @@ Frame {
 		}   	
 	} 
 }
+Frame {
+	Group item=gFlug label="Fluginfos" icon="flugzeug"{ 	
+		
+    	Frame label="Hannover HAJ (EDDV)" {
+		       	Text 	item=flugzeugeAnzahl  		  icon="flugzeug"	  		       
+		       	Text    item=flugzeugeUpdate          icon="flugzeug"	
+		       	Switch  item=flugzeugeAktualisieren   icon="flugzeug"  	
+		       	Text 	item=flugzeugeZeitpunkt		  icon="flugzeug"	       		
+		}      		
+	} 
+}
 } // ENDE
