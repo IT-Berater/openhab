@@ -1,0 +1,44 @@
+import org.openhab.core.library.types.*
+import org.openhab.model.script.actions.*
+import java.util.Date
+import java.text.SimpleDateFormat
+
+//
+//  Fluginfos für OpenHAB
+//
+// (c) 2016 Thomas Wenzlaff http://www.wenzlaff.info 
+//
+
+//------------------------------------------------------------------------
+//   Aktualisiert die Fluginfos, d.h die Anzahl der Flugzeuge aus ThingSpeak
+//------------------------------------------------------------------------
+
+rule "Aktualisiert die Fluginfos von ThingSpeak"
+ when
+    	 Item flugzeugeAktualisieren received command ON
+ then    	 
+		 logInfo("Flug","aktualisiere Fluginfos ...")    
+     
+     var String result = sendHttpGetRequest("https://api.thingspeak.com/channels/44177/feeds/last.json")        
+     // {"created_at":"2016-05-16T16:10:02Z","entry_id":80076,"field1":"11"}' by the function '$.field1'
+     logInfo("Flug", "nur das Ergebnis der Abfrage: " + result)
+                                 			
+		 var String anzahl = transform("JSONPATH", "$.field1", result)		
+		 logInfo("Flug", "Anzahl der Flugzeuge, update auf: " + anzahl)
+		 
+		 var String createdAt = transform("JSONPATH", "$.created_at", result)		
+		 logInfo("Flug", "Letztes update um: " + createdAt)
+		 
+		 // aktualisierungs Datum setzen
+		 flugzeugeUpdate.postUpdate(createdAt)
+		 // aktualisiere Anzahl der Flugzeuge
+		 flugzeugeAnzahl.postUpdate(anzahl)
+		 
+		 // Schalter wieder zurücksetzen
+		 flugzeugeAktualisieren.postUpdate("OFF")
+		 
+		  var SimpleDateFormat df = new SimpleDateFormat( "HH:mm:ss dd.MM.YYYY" )
+          var String timestamp = df.format( new Date() )
+		 flugzeugeZeitpunkt.postUpdate(timestamp);
+		  
+end
