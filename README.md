@@ -17,3 +17,6 @@ Das Verzeichnis karotz-openhab-icon enthält einige Icons für den Karotz z.B.
 ![](https://github.com/IT-Berater/openhab/blob/master/karotz-openhab-icon/karotzGebl-on.png)
 ![](https://github.com/IT-Berater/openhab/blob/master/karotz-openhab-icon/karotzBlau-off.png)
 ![](https://github.com/IT-Berater/openhab/blob/master/karotz-openhab-icon/karotzBlau-on.png)
+
+Und für die Flugabfragen
+![](https://github.com/IT-Berater/openhab/blob/master/karotz-openhab-icon/flugzeut.png)
