@@ -25,3 +25,9 @@ Number fileSystemFree  "Speicher SDKarte frei [%.1f MB]"  (System) { systeminfo=
 
 // Schalter für den openHab Restart
 Switch openHabRestart   "Openhab Restart" (System) {exec=">[ON:sudo /etc/init.d/openhab restart]" ,autoupdate="false"}
+
+// Über ein Script die Systemtemperatur des Raspberry Pis auslesen
+Number systemTempPi     "System Temperatur [%.1f °C]"        (System) { exec="<[./configurations/scripts/getSystemTemp.sh:600000:REGEX((.*?))]" }
+
+
+
