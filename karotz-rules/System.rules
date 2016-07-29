@@ -45,6 +45,19 @@ rule "Sende Temperatur, Luftfeuchte und Status alle 30 Minuten an ThingSpeak.com
 end
 
 //------------------------------------------------------------------------
+//    Sendet Systeminfos um 12 Uhr per Pushover
+//------------------------------------------------------------------------
+				
+rule "Sende Systemstatus per Pushover um 12 Uhr"
+ when
+     Time cron "0 0 12 * * ?"       
+ then     
+  	     var text = "Systeminfo: Systemlaufzeit: " + uptimeFormatted.state + " Systemtemperatur: " + String::format("%.2f ", (systemTempPi.state as DecimalType).floatValue()) +  " ºC. OpenHab Laufzeit: " + openhabUptimeFormatted.state + " Freier Speicher: " + String::format("%.1f", (memFreePercent.state as DecimalType).floatValue()) + " %"
+  	     
+    	 pushover(text)    
+end
+
+//------------------------------------------------------------------------
 //    Sendet Hausstatus um 9 Uhr per Pushover
 //------------------------------------------------------------------------
 
@@ -55,5 +68,21 @@ rule "Sende Hausstatus per Pushover um 9 Uhr"
   	     var text = "Arbeitszimmer: " + azHeizung.state + " ºC Wohnzimmer: " + wzHeizungWand.state + " ºC " + wzHeizungWandFeuchte.state + " %"
   	     
     	 pushover(text)    
+end
+
+//------------------------------------------------------------------------
+//    Führt ein OpenHab System Reboot durch
+//------------------------------------------------------------------------
+
+rule "Führt ein OpenHab System Reboot durch"
+ when
+    	 Item openHabRestart changed
+ then    	  
+        if (openHabRestart.state == ON) {
+             var text = "führe einen reboot von openHab durch ..."  
+             pushover(text)    
+             logInfo("System", text)
+			
+        }
 end
 	
